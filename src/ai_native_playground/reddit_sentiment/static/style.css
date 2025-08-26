@@ -1,0 +1,139 @@
+/* Custom styles for Reddit Sentiment Analyzer */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.feature-box {
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+}
+
+.btn-primary {
+    background-color: #ff4500;
+    border-color: #ff4500;
+}
+
+.btn-primary:hover {
+    background-color: #e03e00;
+    border-color: #e03e00;
+}
+
+.bg-primary {
+    background-color: #ff4500 !important;
+}
+
+.text-primary {
+    color: #ff4500 !important;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.comment-item {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+.comment-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Loading animation */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Custom mood colors */
+.mood-very-positive {
+    color: #28a745 !important;
+}
+
+.mood-positive {
+    color: #6f42c1 !important;
+}
+
+.mood-slightly-positive {
+    color: #20c997 !important;
+}
+
+.mood-neutral {
+    color: #6c757d !important;
+}
+
+.mood-slightly-negative {
+    color: #fd7e14 !important;
+}
+
+.mood-negative {
+    color: #dc3545 !important;
+}
+
+.mood-very-negative {
+    color: #721c24 !important;
+}
+
+/* Form styling */
+.form-control:focus {
+    border-color: #ff4500;
+    box-shadow: 0 0 0 0.2rem rgba(255, 69, 0, 0.25);
+}
+
+.form-select:focus {
+    border-color: #ff4500;
+    box-shadow: 0 0 0 0.2rem rgba(255, 69, 0, 0.25);
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 10px;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .feature-box {
+        margin-bottom: 30px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+}

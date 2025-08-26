@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Reddit Sentiment Analyzer - Home{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h2><i class="fab fa-reddit-alien me-2"></i>Reddit Sentiment Analyzer</h2>
+                <p class="mb-0">Analyze the mood and sentiment of Reddit post comments</p>
+            </div>
+            
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="/analyze-form" id="analyzeForm">
+                    <div class="mb-3">
+                        <label for="reddit_url" class="form-label">
+                            <i class="fab fa-reddit me-2"></i>Reddit Post URL
+                        </label>
+                        <input 
+                            type="url" 
+                            class="form-control" 
+                            id="reddit_url" 
+                            name="reddit_url" 
+                            value="{{ reddit_url or '' }}"
+                            placeholder="https://www.reddit.com/r/example/comments/..."
+                            required
+                        >
+                        <div class="form-text">
+                            Enter a Reddit post URL (e.g., from reddit.com/r/subreddit/comments/... or redd.it/...)
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="max_comments" class="form-label">
+                            <i class="fas fa-comments me-2"></i>Maximum Comments to Analyze
+                        </label>
+                        <select class="form-select" id="max_comments" name="max_comments">
+                            <option value="50">50 comments (Fast)</option>
+                            <option value="100" selected>100 comments (Recommended)</option>
+                            <option value="200">200 comments (Thorough)</option>
+                            <option value="500">500 comments (Comprehensive)</option>
+                        </select>
+                        <div class="form-text">
+                            More comments provide better accuracy but take longer to process
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <i class="fas fa-chart-line me-2"></i>Analyze Sentiment
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <i class="fas fa-smile fa-3x text-success mb-3"></i>
+                            <h5>Mood Analysis</h5>
+                            <p class="text-muted">Determine overall positive, negative, or neutral sentiment</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <i class="fas fa-chart-pie fa-3x text-info mb-3"></i>
+                            <h5>Detailed Breakdown</h5>
+                            <p class="text-muted">View sentiment distribution and confidence scores</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-box">
+                            <i class="fas fa-comments fa-3x text-warning mb-3"></i>
+                            <h5>Top Comments</h5>
+                            <p class="text-muted">See the most positive and negative comments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle me-2"></i>How to Use</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Copy a Reddit post URL from your browser</li>
+                        <li>Paste it into the URL field above</li>
+                        <li>Choose how many comments to analyze</li>
+                        <li>Click "Analyze Sentiment" to see the mood analysis</li>
+                    </ol>
+                    <p class="mb-0"><strong>Supported URLs:</strong></p>
+                    <ul class="mb-0">
+                        <li>https://www.reddit.com/r/subreddit/comments/post_id/title/</li>
+                        <li>https://redd.it/post_id</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Analyzing Reddit Comments...</h5>
+                <p class="mb-0 text-muted">This may take a few seconds</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

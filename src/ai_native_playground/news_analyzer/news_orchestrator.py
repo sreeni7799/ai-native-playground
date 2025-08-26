@@ -3,8 +3,8 @@
 import argparse
 import time
 from typing import List, Dict
-from news_agent import NewsAgent
-from summarizer_agent import SummarizerAgent
+from .news_agent import NewsAgent
+from .summarizer_agent import SummarizerAgent
 
 class NewsOrchestrator:
     def __init__(self):
