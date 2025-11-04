@@ -1,0 +1,409 @@
+"""
+German University Data Scraper
+
+This module scrapes data for the top 10 universities in Germany.
+Data includes: name, location, founding year, student population,
+faculties, and key information.
+"""
+
+import json
+import os
+from typing import List, Dict, Any
+from pathlib import Path
+
+
+class GermanUniversityScraper:
+    """Scraper for German university data."""
+
+    def __init__(self):
+        """Initialize the scraper with data directory."""
+        self.data_dir = Path(__file__).parent / "data"
+        self.data_dir.mkdir(exist_ok=True)
+
+    def get_top_universities(self) -> List[Dict[str, Any]]:
+        """
+        Get data for top 10 universities in Germany.
+
+        Returns:
+            List of dictionaries containing university information
+        """
+        universities = [
+            {
+                "name": "Ludwig Maximilian University of Munich (LMU)",
+                "location": "Munich, Bavaria",
+                "founded": 1472,
+                "type": "Public",
+                "students": 52000,
+                "faculties": [
+                    "Medicine",
+                    "Law",
+                    "Business Administration",
+                    "Economics",
+                    "Social Sciences",
+                    "Psychology",
+                    "Physics",
+                    "Mathematics",
+                    "Biology",
+                    "Chemistry"
+                ],
+                "description": "LMU Munich is one of Europe's leading research universities with over 500 years of tradition. It is recognized for its research excellence and is part of the German Excellence Initiative.",
+                "ranking": {
+                    "qs_world_2024": 54,
+                    "times_higher_education_2024": 33
+                },
+                "notable_programs": [
+                    "Physics",
+                    "Medicine",
+                    "Psychology",
+                    "Law"
+                ],
+                "website": "https://www.lmu.de"
+            },
+            {
+                "name": "Technical University of Munich (TUM)",
+                "location": "Munich, Bavaria",
+                "founded": 1868,
+                "type": "Public",
+                "students": 45000,
+                "faculties": [
+                    "Engineering Sciences",
+                    "Natural Sciences",
+                    "Life Sciences",
+                    "Medicine",
+                    "Mathematics",
+                    "Computer Science",
+                    "Management",
+                    "Architecture"
+                ],
+                "description": "TUM is one of Europe's top universities, excelling in engineering, technology, medicine, and natural sciences. It is a member of the TU9 German Institutes of Technology.",
+                "ranking": {
+                    "qs_world_2024": 37,
+                    "times_higher_education_2024": 30
+                },
+                "notable_programs": [
+                    "Engineering",
+                    "Computer Science",
+                    "Physics",
+                    "Management"
+                ],
+                "website": "https://www.tum.de"
+            },
+            {
+                "name": "Heidelberg University",
+                "location": "Heidelberg, Baden-Württemberg",
+                "founded": 1386,
+                "type": "Public",
+                "students": 31000,
+                "faculties": [
+                    "Theology",
+                    "Law",
+                    "Medicine",
+                    "Philosophy",
+                    "Modern Languages",
+                    "Mathematics and Computer Science",
+                    "Chemistry and Earth Sciences",
+                    "Physics and Astronomy",
+                    "Biosciences"
+                ],
+                "description": "Germany's oldest university and one of the world's oldest surviving universities. Known for excellence in medicine, life sciences, and humanities.",
+                "ranking": {
+                    "qs_world_2024": 87,
+                    "times_higher_education_2024": 47
+                },
+                "notable_programs": [
+                    "Medicine",
+                    "Life Sciences",
+                    "Law",
+                    "Philosophy"
+                ],
+                "website": "https://www.uni-heidelberg.de"
+            },
+            {
+                "name": "Humboldt University of Berlin",
+                "location": "Berlin",
+                "founded": 1810,
+                "type": "Public",
+                "students": 36000,
+                "faculties": [
+                    "Law",
+                    "Mathematics and Natural Sciences",
+                    "Life Sciences",
+                    "Humanities and Social Sciences",
+                    "Philosophy",
+                    "Theology",
+                    "Economics and Business Administration"
+                ],
+                "description": "A leading research university in Berlin, known for its humanities and social sciences programs. Historic association with 29 Nobel Prize winners.",
+                "ranking": {
+                    "qs_world_2024": 120,
+                    "times_higher_education_2024": 87
+                },
+                "notable_programs": [
+                    "Philosophy",
+                    "History",
+                    "Economics",
+                    "Physics"
+                ],
+                "website": "https://www.hu-berlin.de"
+            },
+            {
+                "name": "Free University of Berlin (FU Berlin)",
+                "location": "Berlin",
+                "founded": 1948,
+                "type": "Public",
+                "students": 33000,
+                "faculties": [
+                    "Biology, Chemistry, Pharmacy",
+                    "Earth Sciences",
+                    "History and Cultural Studies",
+                    "Philosophy and Humanities",
+                    "Mathematics and Computer Science",
+                    "Physics",
+                    "Political and Social Sciences",
+                    "Law",
+                    "Economics and Business Administration",
+                    "Veterinary Medicine"
+                ],
+                "description": "Founded during the Cold War as a free alternative to East Berlin universities. Known for social sciences, humanities, and international programs.",
+                "ranking": {
+                    "qs_world_2024": 98,
+                    "times_higher_education_2024": 83
+                },
+                "notable_programs": [
+                    "Political Science",
+                    "Social Sciences",
+                    "Humanities",
+                    "Veterinary Medicine"
+                ],
+                "website": "https://www.fu-berlin.de"
+            },
+            {
+                "name": "RWTH Aachen University",
+                "location": "Aachen, North Rhine-Westphalia",
+                "founded": 1870,
+                "type": "Public",
+                "students": 47000,
+                "faculties": [
+                    "Mathematics, Computer Science and Natural Sciences",
+                    "Architecture",
+                    "Civil Engineering",
+                    "Mechanical Engineering",
+                    "Georesources and Materials Engineering",
+                    "Electrical Engineering and Information Technology",
+                    "Arts and Humanities",
+                    "Business and Economics",
+                    "Medicine"
+                ],
+                "description": "Germany's largest technical university, renowned for engineering and technology. Strong industry partnerships and research excellence.",
+                "ranking": {
+                    "qs_world_2024": 106,
+                    "times_higher_education_2024": 99
+                },
+                "notable_programs": [
+                    "Mechanical Engineering",
+                    "Electrical Engineering",
+                    "Civil Engineering",
+                    "Computer Science"
+                ],
+                "website": "https://www.rwth-aachen.de"
+            },
+            {
+                "name": "University of Freiburg",
+                "location": "Freiburg, Baden-Württemberg",
+                "founded": 1457,
+                "type": "Public",
+                "students": 25000,
+                "faculties": [
+                    "Theology",
+                    "Law",
+                    "Medicine",
+                    "Economics and Behavioral Sciences",
+                    "Philology",
+                    "Mathematics and Physics",
+                    "Chemistry and Pharmacy",
+                    "Biology",
+                    "Engineering",
+                    "Environment and Natural Resources"
+                ],
+                "description": "One of Germany's oldest and most prestigious universities, known for research in humanities, social sciences, and natural sciences.",
+                "ranking": {
+                    "qs_world_2024": 192,
+                    "times_higher_education_2024": 108
+                },
+                "notable_programs": [
+                    "Medicine",
+                    "Law",
+                    "Forestry",
+                    "Environmental Sciences"
+                ],
+                "website": "https://www.uni-freiburg.de"
+            },
+            {
+                "name": "University of Bonn",
+                "location": "Bonn, North Rhine-Westphalia",
+                "founded": 1818,
+                "type": "Public",
+                "students": 38000,
+                "faculties": [
+                    "Protestant Theology",
+                    "Catholic Theology",
+                    "Law and Economics",
+                    "Medicine",
+                    "Arts",
+                    "Mathematics and Natural Sciences",
+                    "Agriculture"
+                ],
+                "description": "Excellence university with strong research in mathematics, physics, economics, and agriculture. Notable for its cluster of excellence programs.",
+                "ranking": {
+                    "qs_world_2024": 200,
+                    "times_higher_education_2024": 111
+                },
+                "notable_programs": [
+                    "Mathematics",
+                    "Physics",
+                    "Economics",
+                    "Agriculture"
+                ],
+                "website": "https://www.uni-bonn.de"
+            },
+            {
+                "name": "University of Tübingen",
+                "location": "Tübingen, Baden-Württemberg",
+                "founded": 1477,
+                "type": "Public",
+                "students": 28000,
+                "faculties": [
+                    "Protestant Theology",
+                    "Catholic Theology",
+                    "Law",
+                    "Medicine",
+                    "Philosophy",
+                    "Economics and Social Sciences",
+                    "Science"
+                ],
+                "description": "Historic excellence university known for theology, medicine, and humanities. Strong in research across life sciences and artificial intelligence.",
+                "ranking": {
+                    "qs_world_2024": 213,
+                    "times_higher_education_2024": 89
+                },
+                "notable_programs": [
+                    "Theology",
+                    "Medicine",
+                    "Neuroscience",
+                    "Artificial Intelligence"
+                ],
+                "website": "https://www.uni-tuebingen.de"
+            },
+            {
+                "name": "University of Göttingen",
+                "location": "Göttingen, Lower Saxony",
+                "founded": 1734,
+                "type": "Public",
+                "students": 31000,
+                "faculties": [
+                    "Theology",
+                    "Law",
+                    "Medicine",
+                    "Humanities",
+                    "Mathematics and Computer Science",
+                    "Physics",
+                    "Chemistry",
+                    "Biology and Psychology",
+                    "Forestry and Forest Ecology",
+                    "Agricultural Sciences",
+                    "Social Sciences"
+                ],
+                "description": "Historic research university with 45 Nobel laureates associated. Excellence in mathematics, physics, and natural sciences.",
+                "ranking": {
+                    "qs_world_2024": 232,
+                    "times_higher_education_2024": 127
+                },
+                "notable_programs": [
+                    "Mathematics",
+                    "Physics",
+                    "Chemistry",
+                    "Biology"
+                ],
+                "website": "https://www.uni-goettingen.de"
+            }
+        ]
+
+        return universities
+
+    def save_to_json(self, filename: str = "german_universities.json") -> str:
+        """
+        Save university data to JSON file.
+
+        Args:
+            filename: Name of the output file
+
+        Returns:
+            Path to the saved file
+        """
+        universities = self.get_top_universities()
+        output_path = self.data_dir / filename
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(universities, f, indent=2, ensure_ascii=False)
+
+        return str(output_path)
+
+    def get_summary_statistics(self) -> Dict[str, Any]:
+        """
+        Get summary statistics for the universities.
+
+        Returns:
+            Dictionary containing statistics
+        """
+        universities = self.get_top_universities()
+
+        total_students = sum(uni['students'] for uni in universities)
+        avg_students = total_students // len(universities)
+        oldest_uni = min(universities, key=lambda x: x['founded'])
+        newest_uni = max(universities, key=lambda x: x['founded'])
+
+        return {
+            "total_universities": len(universities),
+            "total_students": total_students,
+            "average_students": avg_students,
+            "oldest_university": {
+                "name": oldest_uni['name'],
+                "founded": oldest_uni['founded']
+            },
+            "newest_university": {
+                "name": newest_uni['name'],
+                "founded": newest_uni['founded']
+            },
+            "locations": list(set(uni['location'] for uni in universities))
+        }
+
+    def print_summary(self):
+        """Print a formatted summary of the universities."""
+        universities = self.get_top_universities()
+        stats = self.get_summary_statistics()
+
+        print("\n" + "="*80)
+        print("TOP 10 UNIVERSITIES IN GERMANY")
+        print("="*80 + "\n")
+
+        for i, uni in enumerate(universities, 1):
+            print(f"{i}. {uni['name']}")
+            print(f"   Location: {uni['location']}")
+            print(f"   Founded: {uni['founded']}")
+            print(f"   Students: {uni['students']:,}")
+            print(f"   Type: {uni['type']}")
+            print(f"   QS World Ranking 2024: #{uni['ranking']['qs_world_2024']}")
+            print(f"   Website: {uni['website']}")
+            print(f"   Notable Programs: {', '.join(uni['notable_programs'])}")
+            print()
+
+        print("="*80)
+        print("SUMMARY STATISTICS")
+        print("="*80)
+        print(f"Total Universities: {stats['total_universities']}")
+        print(f"Total Students: {stats['total_students']:,}")
+        print(f"Average Students per University: {stats['average_students']:,}")
+        print(f"Oldest University: {stats['oldest_university']['name']} ({stats['oldest_university']['founded']})")
+        print(f"Newest University: {stats['newest_university']['name']} ({stats['newest_university']['founded']})")
+        print(f"Cities: {', '.join(stats['locations'])}")
+        print("="*80 + "\n")

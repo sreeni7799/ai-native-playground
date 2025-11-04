@@ -29,6 +29,13 @@ A collection of AI-powered Python applications including a weather API, news ana
 - Visual representation of positive/negative/neutral distribution
 - No Reddit API key required - uses public JSON endpoints
 
+### German Universities Data Scraper
+- Comprehensive data for top 10 universities in Germany
+- Includes location, founding year, student population, and rankings
+- Faculty information and notable programs
+- Export data to JSON format for model training
+- Summary statistics and formatted display
+
 ## 📁 Project Structure
 
 ```
@@ -59,6 +66,11 @@ ai-native-playground/
 │       │   ├── cli.py
 │       │   ├── templates/         # HTML templates
 │       │   └── static/            # CSS and JavaScript files
+│       ├── german_universities/   # German universities scraper module
+│       │   ├── __init__.py
+│       │   ├── scraper.py
+│       │   ├── cli.py
+│       │   └── data/              # Output data directory
 │       └── tests/                 # Test suite
 │           ├── __init__.py
 │           └── test_weather_api.py
@@ -150,6 +162,21 @@ reddit-sentiment
 
 # The web app will be available at http://localhost:8001
 # API documentation at http://localhost:8001/docs
+```
+
+### German Universities Data Scraper
+```bash
+# Display all universities with details
+german-universities
+
+# Save data to JSON file
+german-universities --save
+
+# Show only summary statistics
+german-universities --stats-only
+
+# Custom output filename
+german-universities --save --output my_universities.json
 ```
 
 ## 🧪 Testing

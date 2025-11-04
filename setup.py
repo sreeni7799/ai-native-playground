@@ -46,6 +46,7 @@ setup(
             "news-analyzer=ai_native_playground.news_analyzer.cli:main",
             "todo-app=ai_native_playground.todo_app.cli:main",
             "reddit-sentiment=ai_native_playground.reddit_sentiment.cli:main",
+            "german-universities=ai_native_playground.german_universities.cli:main",
         ],
     },
     include_package_data=True,
