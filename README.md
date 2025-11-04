@@ -36,6 +36,18 @@ A collection of AI-powered Python applications including a weather API, news ana
 - Export data to JSON format for model training
 - Summary statistics and formatted display
 
+### Global Universities Dataset (1000+ Universities)
+- Comprehensive dataset of 1000 universities across 6 countries
+- **United States**: 200 universities
+- **Canada**: 170 universities
+- **Germany**: 170 universities
+- **United Kingdom**: 170 universities
+- **Australia**: 140 universities
+- **France**: 150 universities
+- Includes rankings, student populations, founding years, and notable programs
+- CLI for searching, filtering, and exporting data
+- Perfect for AI model training and research
+
 ## 📁 Project Structure
 
 ```
@@ -71,6 +83,12 @@ ai-native-playground/
 │       │   ├── scraper.py
 │       │   ├── cli.py
 │       │   └── data/              # Output data directory
+│       ├── universities/          # Global universities dataset (1000+)
+│       │   ├── __init__.py
+│       │   ├── data_loader.py
+│       │   ├── generate_data.py
+│       │   ├── cli.py
+│       │   └── data/              # Dataset storage
 │       └── tests/                 # Test suite
 │           ├── __init__.py
 │           └── test_weather_api.py
@@ -177,6 +195,28 @@ german-universities --stats-only
 
 # Custom output filename
 german-universities --save --output my_universities.json
+```
+
+### Global Universities Dataset
+```bash
+# Show comprehensive statistics
+universities --stats
+
+# List universities from a specific country
+universities --country "United States" --limit 20
+universities --country Canada --limit 15
+universities --country Germany
+
+# Search for universities
+universities --search "MIT"
+universities --search "Cambridge"
+universities --search "Munich"
+
+# Export data for specific country
+universities --country France --export french_universities.json
+
+# Export all data
+universities --export all_universities.json
 ```
 
 ## 🧪 Testing
