@@ -36,33 +36,39 @@ A collection of AI-powered Python applications including a weather API, news ana
 - Export data to JSON format for model training
 - Summary statistics and formatted display
 
-### Global Universities Dataset (1000+ Universities)
-- Comprehensive dataset of 1000 universities across 6 countries
-- **United States**: 200 universities
-- **Canada**: 170 universities
-- **Germany**: 170 universities
-- **United Kingdom**: 170 universities
-- **Australia**: 140 universities
-- **France**: 150 universities
+### 🌍 Global Universities Dataset (4,550 Universities!)
+- Comprehensive dataset of **4,550 universities across 20 countries**
+- **United States**: 700 universities
+- **China**: 500 universities
+- **India**: 500 universities
+- **Canada**: 300 universities
+- **Germany**: 300 universities
+- **United Kingdom**: 300 universities
+- **France**: 250 universities
+- **Japan**: 200 universities
+- **Australia**: 200 universities
+- **Brazil**: 200 universities
+- Plus: Italy (150), Spain (150), South Korea (150), Mexico (150), Switzerland (100), Sweden (100), Netherlands (100), South Africa (100), Singapore (50), Hong Kong (50)
 - Includes rankings, student populations, founding years, and notable programs
 - CLI for searching, filtering, and exporting data
-- Perfect for AI model training and research
+- Perfect for AI/ML model training and research
 
 ### 🤖 ML-Powered University Recommendation System
-- **Trained machine learning model** using scikit-learn on 1000+ universities
+- **Trained machine learning model** using scikit-learn on **4,550 universities**
 - **Content-based filtering** using university features (ranking, size, type, location)
 - **Similarity search** to find universities similar to your favorites
 - **Personalized recommendations** based on your preferences
 - Features: K-Nearest Neighbors, PCA dimensionality reduction, cosine similarity
-- Trained model size: ~1MB, fast inference
+- Trained model size: ~3MB, fast inference (<1 second)
 - Command-line interface for instant recommendations
+- Global coverage: 20 countries across 6 continents
 
 ### 💬 LLM-Powered University Chatbot (RAG System)
 - **Chat naturally** with an AI about universities using OpenAI GPT
 - **Retrieval Augmented Generation (RAG)** - Answers backed by real data
-- **1000+ university database** as knowledge base
+- **4,550 university database** across 20 countries as knowledge base
 - **Interactive CLI** for conversational queries
-- Ask questions like "Tell me about MIT", "Compare Stanford and Harvard"
+- Ask about universities in US, China, India, UK, Germany, Japan, and 14 more countries
 - Works with or without OpenAI API key (fallback mode available)
 
 ## 📁 Project Structure

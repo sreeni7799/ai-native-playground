@@ -15,13 +15,19 @@ class RecommendationCLI:
 
     def __init__(self):
         """Initialize the CLI with trained model."""
-        self.model_path = Path(__file__).parent / "data" / "university_recommendation_model.pkl"
+        # Try to load the new 4k model first, fallback to 1k model
+        self.model_path_4k = Path(__file__).parent / "data" / "university_recommendation_model_4k.pkl"
+        self.model_path_1k = Path(__file__).parent / "data" / "university_recommendation_model.pkl"
         self.model = UniversityRecommendationModel()
 
-        if self.model_path.exists():
-            self.model.load_model(str(self.model_path))
+        if self.model_path_4k.exists():
+            self.model.load_model(str(self.model_path_4k))
+        elif self.model_path_1k.exists():
+            print("⚠ Using legacy 1000 university model. For 4500+ universities, retrain:")
+            print("  python -m ai_native_playground.universities.ml_model")
+            self.model.load_model(str(self.model_path_1k))
         else:
-            print(f"Error: Trained model not found at {self.model_path}")
+            print(f"Error: Trained model not found")
             print("Please train the model first:")
             print("  python -m ai_native_playground.universities.ml_model")
             sys.exit(1)

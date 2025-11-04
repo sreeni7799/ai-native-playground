@@ -374,9 +374,9 @@ def train_model_from_dataset(dataset_path: str, output_path: str):
 
 
 if __name__ == "__main__":
-    # Train the model
-    dataset_path = Path(__file__).parent / "data" / "universities_1000_dataset.json"
-    model_path = Path(__file__).parent / "data" / "university_recommendation_model.pkl"
+    # Train the model with the expanded 4000+ university dataset
+    dataset_path = Path(__file__).parent / "data" / "universities_4000_dataset.json"
+    model_path = Path(__file__).parent / "data" / "university_recommendation_model_4k.pkl"
 
     if dataset_path.exists():
         model = train_model_from_dataset(str(dataset_path), str(model_path))
@@ -406,4 +406,4 @@ if __name__ == "__main__":
         print("\n✓ Model training and testing completed!")
     else:
         print(f"Error: Dataset not found at {dataset_path}")
-        print("Please run: python -m ai_native_playground.universities.generate_data")
+        print("Please run: python -m ai_native_playground.universities.generate_4000_data")

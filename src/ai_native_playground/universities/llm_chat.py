@@ -36,8 +36,15 @@ class UniversityChatbot:
         self.use_openai = use_openai
         self.api_key = api_key or os.getenv('OPENAI_API_KEY')
 
-        # Load university data
-        self.data_path = Path(__file__).parent / "data" / "universities_1000_dataset.json"
+        # Load university data - try 4k dataset first, fallback to 1k
+        self.data_path_4k = Path(__file__).parent / "data" / "universities_4000_dataset.json"
+        self.data_path_1k = Path(__file__).parent / "data" / "universities_1000_dataset.json"
+
+        if self.data_path_4k.exists():
+            self.data_path = self.data_path_4k
+        else:
+            self.data_path = self.data_path_1k
+
         self.universities = self._load_universities()
 
         # Initialize retrieval system
