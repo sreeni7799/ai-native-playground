@@ -48,6 +48,15 @@ A collection of AI-powered Python applications including a weather API, news ana
 - CLI for searching, filtering, and exporting data
 - Perfect for AI model training and research
 
+### 🤖 ML-Powered University Recommendation System
+- **Trained machine learning model** using scikit-learn on 1000+ universities
+- **Content-based filtering** using university features (ranking, size, type, location)
+- **Similarity search** to find universities similar to your favorites
+- **Personalized recommendations** based on your preferences
+- Features: K-Nearest Neighbors, PCA dimensionality reduction, cosine similarity
+- Trained model size: ~1MB, fast inference
+- Command-line interface for instant recommendations
+
 ## 📁 Project Structure
 
 ```
@@ -217,6 +226,30 @@ universities --country France --export french_universities.json
 
 # Export all data
 universities --export all_universities.json
+```
+
+### ML-Powered University Recommendations
+```bash
+# Find universities similar to a specific university
+university-recommend --similar "Harvard University"
+university-recommend --similar "Stanford"
+university-recommend --similar "Oxford"
+
+# Get recommendations based on your preferences
+# Top-ranked universities
+university-recommend --max-rank 50 --limit 10
+
+# Large public universities
+university-recommend --type Public --min-students 30000
+
+# Small private universities with good rankings
+university-recommend --type Private --max-students 15000 --max-rank 100
+
+# Combine multiple filters
+university-recommend --type Public --max-rank 100 --min-students 20000 --limit 15
+
+# Train the model (already done, but you can retrain)
+python -m ai_native_playground.universities.ml_model
 ```
 
 ## 🧪 Testing

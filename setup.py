@@ -48,6 +48,7 @@ setup(
             "reddit-sentiment=ai_native_playground.reddit_sentiment.cli:main",
             "german-universities=ai_native_playground.german_universities.cli:main",
             "universities=ai_native_playground.universities.cli:main",
+            "university-recommend=ai_native_playground.universities.recommend_cli:main",
         ],
     },
     include_package_data=True,
