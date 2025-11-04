@@ -49,6 +49,7 @@ setup(
             "german-universities=ai_native_playground.german_universities.cli:main",
             "universities=ai_native_playground.universities.cli:main",
             "university-recommend=ai_native_playground.universities.recommend_cli:main",
+            "university-chat=ai_native_playground.universities.chat_cli:main",
         ],
     },
     include_package_data=True,

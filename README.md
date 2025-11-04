@@ -57,6 +57,14 @@ A collection of AI-powered Python applications including a weather API, news ana
 - Trained model size: ~1MB, fast inference
 - Command-line interface for instant recommendations
 
+### 💬 LLM-Powered University Chatbot (RAG System)
+- **Chat naturally** with an AI about universities using OpenAI GPT
+- **Retrieval Augmented Generation (RAG)** - Answers backed by real data
+- **1000+ university database** as knowledge base
+- **Interactive CLI** for conversational queries
+- Ask questions like "Tell me about MIT", "Compare Stanford and Harvard"
+- Works with or without OpenAI API key (fallback mode available)
+
 ## 📁 Project Structure
 
 ```
@@ -250,6 +258,23 @@ university-recommend --type Public --max-rank 100 --min-students 20000 --limit 1
 
 # Train the model (already done, but you can retrain)
 python -m ai_native_playground.universities.ml_model
+```
+
+### LLM-Powered University Chat
+```bash
+# Set your OpenAI API key (optional but recommended)
+export OPENAI_API_KEY='your-api-key-here'
+
+# Start interactive chat
+university-chat
+
+# Ask a single question
+university-chat --query "Tell me about MIT"
+university-chat --query "What are the top universities in the world?"
+university-chat --query "Compare Oxford and Cambridge"
+
+# Show dataset stats
+university-chat --stats
 ```
 
 ## 🧪 Testing
