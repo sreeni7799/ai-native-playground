@@ -71,6 +71,17 @@ A collection of AI-powered Python applications including a weather API, news ana
 - Ask about universities in US, China, India, UK, Germany, Japan, and 14 more countries
 - Works with or without OpenAI API key (fallback mode available)
 
+### 💰 Scholarship Recommendation System (4,000+ Scholarships!)
+- **Comprehensive dataset of 4,011 scholarships** across 18 countries
+- **ML-powered recommendations** using content-based filtering (KNN + PCA)
+- **LLM chatbot** with RAG system for natural language scholarship search
+- **Major scholarships included**: Fulbright, Rhodes, Gates Millennium, Chevening, DAAD, NSF Fellowship
+- **Filter by**: country, field of study, education level, scholarship type, amount range, renewable status
+- **Coverage**: US (805), UK (503), Canada (301), Germany (301), Australia (251), France (200), Japan (200), China (200), and 10 more countries
+- **Average scholarship amount**: $27,959 | **Maximum**: $59,979
+- **50.6% renewable scholarships**
+- Interactive and command-line interfaces for both ML recommendations and LLM chat
+
 ## 📁 Project Structure
 
 ```
@@ -106,11 +117,23 @@ ai-native-playground/
 │       │   ├── scraper.py
 │       │   ├── cli.py
 │       │   └── data/              # Output data directory
-│       ├── universities/          # Global universities dataset (1000+)
+│       ├── universities/          # Global universities dataset (4550+)
 │       │   ├── __init__.py
 │       │   ├── data_loader.py
 │       │   ├── generate_data.py
+│       │   ├── ml_model.py        # ML recommendation model
+│       │   ├── llm_chat.py        # LLM chatbot
+│       │   ├── recommend_cli.py   # ML recommendation CLI
+│       │   ├── chat_cli.py        # Chatbot CLI
 │       │   ├── cli.py
+│       │   └── data/              # Dataset storage
+│       ├── scholarships/          # Scholarships dataset (4000+)
+│       │   ├── __init__.py
+│       │   ├── generate_scholarships.py  # Data generator
+│       │   ├── ml_model.py        # ML recommendation model
+│       │   ├── llm_chat.py        # LLM chatbot
+│       │   ├── recommend_cli.py   # ML recommendation CLI
+│       │   ├── chat_cli.py        # Chatbot CLI
 │       │   └── data/              # Dataset storage
 │       └── tests/                 # Test suite
 │           ├── __init__.py
@@ -281,6 +304,52 @@ university-chat --query "Compare Oxford and Cambridge"
 
 # Show dataset stats
 university-chat --stats
+```
+
+### ML-Powered Scholarship Recommendations
+```bash
+# Interactive mode (answer questions to get personalized recommendations)
+scholarship-recommend
+
+# Find scholarships by country and field
+scholarship-recommend --country "United States" --field Engineering
+scholarship-recommend --country "United Kingdom" --field Medicine
+
+# High-value scholarships
+scholarship-recommend --min-amount 30000 --n 10
+scholarship-recommend --min-amount 40000 --renewable
+
+# Filter by education level
+scholarship-recommend --level Graduate --field "Computer Science"
+scholarship-recommend --level Undergraduate --type Merit-based
+
+# Find similar scholarships
+scholarship-recommend --similar "Fulbright Program"
+scholarship-recommend --similar "Rhodes Scholarship"
+
+# Complex queries
+scholarship-recommend --country Canada --field Engineering --level Graduate --min-amount 20000 --renewable
+```
+
+### LLM-Powered Scholarship Chat
+```bash
+# Set your OpenAI API key (optional but recommended)
+export OPENAI_API_KEY='your-api-key-here'
+
+# Start interactive chat
+scholarship-chat
+
+# Ask questions about scholarships
+scholarship-chat --query "Show me engineering scholarships"
+scholarship-chat --query "What scholarships are available in UK?"
+scholarship-chat --query "Tell me about Fulbright scholarship"
+scholarship-chat --query "High-value renewable scholarships"
+scholarship-chat --query "Need-based scholarships in Canada"
+scholarship-chat --query "Merit scholarships over $30,000"
+scholarship-chat --query "Scholarships for computer science PhD students"
+
+# Show database statistics
+scholarship-chat --stats
 ```
 
 ## 🧪 Testing
