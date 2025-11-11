@@ -11,7 +11,30 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import os
+import sys
 from pathlib import Path
+
+# Startup diagnostics
+print("=" * 80)
+print("🚀 AI Education Platform Starting...")
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
+print(f"Python path: {sys.path[:3]}")
+
+# Check if sklearn is available
+try:
+    import sklearn
+    print(f"✓ sklearn available: {sklearn.__version__}")
+except ImportError as e:
+    print(f"✗ sklearn NOT available: {e}")
+
+try:
+    import numpy
+    print(f"✓ numpy available: {numpy.__version__}")
+except ImportError as e:
+    print(f"✗ numpy NOT available: {e}")
+
+print("=" * 80)
 
 # Lazy imports - only import when needed to avoid startup errors
 # This allows the app to start even if ML dependencies aren't fully loaded yet
