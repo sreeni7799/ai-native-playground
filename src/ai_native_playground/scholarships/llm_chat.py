@@ -9,9 +9,6 @@ import json
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 
 
 class ScholarshipChatbot:
@@ -26,6 +23,9 @@ class ScholarshipChatbot:
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize the chatbot."""
+        # Lazy import to avoid startup errors
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
         self.data_path = Path(__file__).parent / "data" / "scholarships_4000_dataset.json"
 
         # Load scholarship data
@@ -106,6 +106,10 @@ class ScholarshipChatbot:
         Returns:
             List of relevant scholarships with similarity scores
         """
+        # Lazy imports to avoid startup errors
+        import numpy as np
+        from sklearn.metrics.pairwise import cosine_similarity
+
         # Expand query with common synonyms
         query_expanded = self._expand_query(query)
 

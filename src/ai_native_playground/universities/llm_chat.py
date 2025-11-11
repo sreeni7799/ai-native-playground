@@ -9,9 +9,6 @@ import json
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 class UniversityChatbot:
@@ -77,6 +74,9 @@ class UniversityChatbot:
 
     def _initialize_retrieval(self):
         """Initialize TF-IDF vectorizer for document retrieval."""
+        # Lazy import to avoid startup errors
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
         # Create searchable text for each university
         documents = []
         for uni in self.universities:
@@ -119,6 +119,10 @@ class UniversityChatbot:
         Returns:
             List of relevant universities
         """
+        # Lazy imports to avoid startup errors
+        import numpy as np
+        from sklearn.metrics.pairwise import cosine_similarity
+
         # Vectorize query
         query_vector = self.vectorizer.transform([query])
 
