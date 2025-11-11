@@ -23,26 +23,16 @@ class ScholarshipChatbot:
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize the chatbot."""
-        # Lazy import to avoid startup errors
-        from sklearn.feature_extraction.text import TfidfVectorizer
-
         self.data_path = Path(__file__).parent / "data" / "scholarships_4000_dataset.json"
 
         # Load scholarship data
         self.scholarships = self._load_scholarships()
 
-        # Initialize TF-IDF vectorizer
-        self.vectorizer = TfidfVectorizer(
-            max_features=1000,
-            ngram_range=(1, 2),
-            stop_words='english'
-        )
-
-        # Create searchable text for each scholarship
-        self.scholarship_texts = self._create_searchable_texts()
-
-        # Fit vectorizer
-        self.tfidf_matrix = self.vectorizer.fit_transform(self.scholarship_texts)
+        # Defer TF-IDF initialization until first query (truly lazy loading)
+        self.vectorizer = None
+        self.tfidf_matrix = None
+        self.scholarship_texts = None
+        self._retrieval_initialized = False
 
         # Initialize OpenAI client
         self.llm_available = False
@@ -89,6 +79,25 @@ class ScholarshipChatbot:
 
         return texts
 
+    def _initialize_retrieval(self):
+        """Initialize TF-IDF vectorizer for document retrieval (lazy loading)."""
+        # Lazy import to avoid startup errors
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
+        # Initialize TF-IDF vectorizer
+        self.vectorizer = TfidfVectorizer(
+            max_features=1000,
+            ngram_range=(1, 2),
+            stop_words='english'
+        )
+
+        # Create searchable text for each scholarship
+        self.scholarship_texts = self._create_searchable_texts()
+
+        # Fit vectorizer
+        self.tfidf_matrix = self.vectorizer.fit_transform(self.scholarship_texts)
+        self._retrieval_initialized = True
+
     def retrieve_relevant_scholarships(
         self,
         query: str,
@@ -106,6 +115,10 @@ class ScholarshipChatbot:
         Returns:
             List of relevant scholarships with similarity scores
         """
+        # Ensure retrieval system is initialized (truly lazy loading)
+        if not self._retrieval_initialized:
+            self._initialize_retrieval()
+
         # Lazy imports to avoid startup errors
         import numpy as np
         from sklearn.metrics.pairwise import cosine_similarity

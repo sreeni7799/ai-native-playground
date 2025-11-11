@@ -44,8 +44,10 @@ class UniversityChatbot:
 
         self.universities = self._load_universities()
 
-        # Initialize retrieval system
-        self._initialize_retrieval()
+        # Defer retrieval initialization until first query (truly lazy loading)
+        self.vectorizer = None
+        self.doc_vectors = None
+        self._retrieval_initialized = False
 
         # Initialize LLM if available
         if self.use_openai and self.api_key:
@@ -103,6 +105,7 @@ class UniversityChatbot:
             min_df=1
         )
         self.doc_vectors = self.vectorizer.fit_transform(documents)
+        self._retrieval_initialized = True
 
     def retrieve_relevant_universities(
         self,
@@ -119,6 +122,10 @@ class UniversityChatbot:
         Returns:
             List of relevant universities
         """
+        # Ensure retrieval system is initialized (truly lazy loading)
+        if not self._retrieval_initialized:
+            self._initialize_retrieval()
+
         # Lazy imports to avoid startup errors
         import numpy as np
         from sklearn.metrics.pairwise import cosine_similarity
