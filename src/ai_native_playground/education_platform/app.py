@@ -648,25 +648,52 @@ async def chat(request: ChatRequest):
 
         # Get university response
         if context in ["universities", "both"]:
-            uni_chatbot = get_university_chatbot()
-            uni_result = uni_chatbot.chat(request.query)
-            responses.append({
-                "type": "universities",
-                "response": uni_result['response'],
-                "items_found": uni_result.get('scholarships_found', 0),
-                "using_llm": uni_result['using_llm']
-            })
+            try:
+                uni_chatbot = get_university_chatbot()
+                uni_result = uni_chatbot.chat(request.query)
+                responses.append({
+                    "type": "universities",
+                    "response": uni_result['response'],
+                    "items_found": uni_result.get('scholarships_found', 0),
+                    "using_llm": uni_result.get('using_llm', False)
+                })
+            except Exception as uni_error:
+                # Fallback response if university chatbot fails
+                responses.append({
+                    "type": "universities",
+                    "response": f"I'm having trouble accessing the university database right now. Error: {str(uni_error)[:100]}",
+                    "items_found": 0,
+                    "using_llm": False
+                })
 
         # Get scholarship response
         if context in ["scholarships", "both"]:
-            scholarship_chatbot = get_scholarship_chatbot()
-            scholarship_result = scholarship_chatbot.chat(request.query)
-            responses.append({
-                "type": "scholarships",
-                "response": scholarship_result['response'],
-                "items_found": scholarship_result['scholarships_found'],
-                "using_llm": scholarship_result['using_llm']
-            })
+            try:
+                scholarship_chatbot = get_scholarship_chatbot()
+                scholarship_result = scholarship_chatbot.chat(request.query)
+                responses.append({
+                    "type": "scholarships",
+                    "response": scholarship_result['response'],
+                    "items_found": scholarship_result.get('scholarships_found', 0),
+                    "using_llm": scholarship_result.get('using_llm', False)
+                })
+            except Exception as schol_error:
+                # Fallback response if scholarship chatbot fails
+                responses.append({
+                    "type": "scholarships",
+                    "response": f"I'm having trouble accessing the scholarship database right now. Error: {str(schol_error)[:100]}",
+                    "items_found": 0,
+                    "using_llm": False
+                })
+
+        # Return empty response if no responses
+        if not responses:
+            return {
+                "success": False,
+                "query": request.query,
+                "response": "I'm sorry, I'm having trouble processing your request right now. Please try again in a moment.",
+                "error": "No responses generated"
+            }
 
         # Combine responses if both
         if context == "both" and len(responses) == 2:
@@ -692,7 +719,17 @@ async def chat(request: ChatRequest):
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Final fallback
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Chat endpoint error: {error_details}")  # Log for debugging
+
+        return {
+            "success": False,
+            "query": request.query,
+            "response": f"I apologize, but I'm experiencing technical difficulties. Please try asking your question again in a moment.\n\nIf the problem persists, you can try:\n• Using the API documentation at /api/docs\n• Asking a simpler question\n• Checking back in a few minutes\n\nError: {str(e)[:200]}",
+            "error": str(e)[:200]
+        }
 
 
 if __name__ == "__main__":
