@@ -166,38 +166,76 @@ class ScholarshipChatbot:
 
     def _simple_keyword_search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Simple keyword-based search when sklearn is not available."""
+        import re
+
         query_lower = query.lower()
         keywords = query_lower.split()
+
+        # Remove common words
+        stop_words = {'the', 'in', 'at', 'of', 'for', 'and', 'or', 'a', 'an', 'show', 'me', 'what', 'are', 'available', 'scholarship', 'scholarships'}
+        keywords = [k for k in keywords if k not in stop_words]
 
         # Score each scholarship by keyword matches
         scored_scholarships = []
         for scholarship in self.scholarships:
             score = 0
-            scholarship_text = f"{scholarship.get('name', '')} {scholarship.get('provider', '')} {scholarship.get('country', '')} {scholarship.get('type', '')} {scholarship.get('field', '')} {scholarship.get('level', '')}".lower()
+
+            # Create searchable fields with word boundaries
+            name_lower = scholarship.get('name', '').lower()
+            provider_lower = scholarship.get('provider', '').lower()
+            country_lower = scholarship.get('country', '').lower()
+            type_lower = scholarship.get('type', '').lower()
+            field_lower = scholarship.get('field', '').lower()
+            level_lower = scholarship.get('level', '').lower()
 
             for keyword in keywords:
-                if keyword in scholarship_text:
+                # Use word boundary matching
+                pattern = r'\b' + re.escape(keyword) + r'\b'
+
+                if re.search(pattern, country_lower):
+                    score += 5  # Country match is very important
+                if re.search(pattern, field_lower):
+                    score += 3
+                if re.search(pattern, type_lower):
+                    score += 2
+                if re.search(pattern, level_lower):
+                    score += 2
+                if re.search(pattern, name_lower):
+                    score += 1
+                if re.search(pattern, provider_lower):
                     score += 1
 
             # Check for special keywords
             if 'renewable' in query_lower and scholarship.get('renewable'):
-                score += 2
+                score += 3
             if 'international' in query_lower and scholarship.get('level') == 'International':
-                score += 2
+                score += 3
 
             # Check amount if specified in query
             if any(amount_word in query_lower for amount_word in ['over', 'above', 'high', 'large']):
-                if scholarship.get('amount', 0) > 30000:
-                    score += 1
+                # Extract number if present
+                amount_match = re.search(r'\$?(\d+[,\d]*)', query_lower)
+                threshold = 30000
+                if amount_match:
+                    threshold = int(amount_match.group(1).replace(',', ''))
+
+                if scholarship.get('amount', 0) >= threshold:
+                    score += 3
 
             if score > 0:
                 scholarship_copy = scholarship.copy()
-                scholarship_copy['similarity_score'] = float(score) / len(keywords)
+                scholarship_copy['similarity_score'] = float(score) / max(len(keywords), 1)
                 scored_scholarships.append(scholarship_copy)
 
         # Sort by score and return top-k
         scored_scholarships.sort(key=lambda x: x['similarity_score'], reverse=True)
-        return scored_scholarships[:top_k] if scored_scholarships else self.scholarships[:top_k]
+
+        # If no results, return highest value scholarships
+        if not scored_scholarships:
+            sorted_scholarships = sorted(self.scholarships, key=lambda x: x.get('amount', 0), reverse=True)
+            return sorted_scholarships[:top_k]
+
+        return scored_scholarships[:top_k]
 
     def _expand_query(self, query: str) -> str:
         """Expand query with synonyms and related terms."""

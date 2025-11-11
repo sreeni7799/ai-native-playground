@@ -166,27 +166,53 @@ class UniversityChatbot:
 
     def _simple_keyword_search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Simple keyword-based search when sklearn is not available."""
+        import re
+
         query_lower = query.lower()
         keywords = query_lower.split()
+
+        # Remove common words
+        stop_words = {'the', 'in', 'at', 'of', 'for', 'and', 'or', 'a', 'an', 'country', 'best', 'top', 'show', 'me', 'university', 'universities'}
+        keywords = [k for k in keywords if k not in stop_words]
 
         # Score each university by keyword matches
         scored_unis = []
         for uni in self.universities:
             score = 0
-            uni_text = f"{uni['name']} {uni.get('city', '')} {uni['country']} {uni['type']}".lower()
+
+            # Create searchable fields with word boundaries
+            name_lower = uni['name'].lower()
+            city_lower = uni.get('city', '').lower()
+            country_lower = uni['country'].lower()
+            type_lower = uni['type'].lower()
 
             for keyword in keywords:
-                if keyword in uni_text:
+                # Use word boundary matching to avoid "india" matching "indianapolis"
+                pattern = r'\b' + re.escape(keyword) + r'\b'
+
+                if re.search(pattern, name_lower):
+                    score += 3  # Name match is most important
+                if re.search(pattern, country_lower):
+                    score += 5  # Country match is very important
+                if re.search(pattern, city_lower):
+                    score += 2
+                if re.search(pattern, type_lower):
                     score += 1
 
             if score > 0:
                 uni_copy = uni.copy()
-                uni_copy['relevance_score'] = float(score) / len(keywords)
+                uni_copy['relevance_score'] = float(score) / max(len(keywords), 1)
                 scored_unis.append(uni_copy)
 
         # Sort by score and return top-k
         scored_unis.sort(key=lambda x: x['relevance_score'], reverse=True)
-        return scored_unis[:top_k] if scored_unis else self.universities[:top_k]
+
+        # If no results, return top-ranked universities
+        if not scored_unis:
+            sorted_unis = sorted(self.universities, key=lambda x: x.get('ranking', 9999))
+            return sorted_unis[:top_k]
+
+        return scored_unis[:top_k]
 
     def format_university_context(self, universities: List[Dict[str, Any]]) -> str:
         """Format university data as context for the LLM."""
