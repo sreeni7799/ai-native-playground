@@ -3,5 +3,15 @@ include LICENSE
 include requirements.txt
 include .env.example
 recursive-include src/ai_native_playground *.py
+
+# Include chatbot templates and static files
+recursive-include src/ai_native_playground/education_platform/templates *.html
+recursive-include src/ai_native_playground/education_platform/static *
+
+# Include data files (generated during build)
+recursive-include src/ai_native_playground/universities/data *.json *.pkl
+recursive-include src/ai_native_playground/scholarships/data *.json *.pkl
+
+# Exclude bytecode
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
