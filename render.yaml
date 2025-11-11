@@ -15,12 +15,14 @@ services:
       pip install -e .
       python -m ai_native_playground.universities.generate_4000_data
       python -m ai_native_playground.scholarships.generate_scholarships
-    startCommand: uvicorn ai_native_playground.education_platform.app:app --host 0.0.0.0 --port $PORT
+    startCommand: python -m uvicorn ai_native_playground.education_platform.app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
         sync: false  # Optional: Set this in Render dashboard for LLM features
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: PYTHONPATH
+        value: /opt/render/project/src
 
   # Weather API Service
   - type: web

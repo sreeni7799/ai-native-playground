@@ -13,13 +13,8 @@ from typing import Optional, Dict, Any, List
 import os
 from pathlib import Path
 
-# Import university components
-from ..universities.ml_model import UniversityRecommendationModel
-from ..universities.llm_chat import UniversityChatbot
-
-# Import scholarship components
-from ..scholarships.ml_model import ScholarshipRecommendationModel
-from ..scholarships.llm_chat import ScholarshipChatbot
+# Lazy imports - only import when needed to avoid startup errors
+# This allows the app to start even if ML dependencies aren't fully loaded yet
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -48,6 +43,8 @@ _scholarship_chatbot = None
 
 def get_university_model():
     """Get or initialize university ML model."""
+    from ..universities.ml_model import UniversityRecommendationModel
+
     global _university_model
     if _university_model is None:
         _university_model = UniversityRecommendationModel()
@@ -59,6 +56,8 @@ def get_university_model():
 
 def get_scholarship_model():
     """Get or initialize scholarship ML model."""
+    from ..scholarships.ml_model import ScholarshipRecommendationModel
+
     global _scholarship_model
     if _scholarship_model is None:
         _scholarship_model = ScholarshipRecommendationModel()
@@ -70,6 +69,8 @@ def get_scholarship_model():
 
 def get_university_chatbot():
     """Get or initialize university chatbot."""
+    from ..universities.llm_chat import UniversityChatbot
+
     global _university_chatbot
     if _university_chatbot is None:
         api_key = os.getenv('OPENAI_API_KEY')
@@ -79,6 +80,8 @@ def get_university_chatbot():
 
 def get_scholarship_chatbot():
     """Get or initialize scholarship chatbot."""
+    from ..scholarships.llm_chat import ScholarshipChatbot
+
     global _scholarship_chatbot
     if _scholarship_chatbot is None:
         api_key = os.getenv('OPENAI_API_KEY')
