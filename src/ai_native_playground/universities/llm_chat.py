@@ -76,36 +76,40 @@ class UniversityChatbot:
 
     def _initialize_retrieval(self):
         """Initialize TF-IDF vectorizer for document retrieval."""
-        # Lazy import to avoid startup errors
-        from sklearn.feature_extraction.text import TfidfVectorizer
+        try:
+            # Lazy import to avoid startup errors
+            from sklearn.feature_extraction.text import TfidfVectorizer
 
-        # Create searchable text for each university
-        documents = []
-        for uni in self.universities:
-            text_parts = [
-                uni['name'],
-                uni.get('city', ''),
-                uni['country'],
-                uni['type'],
-                f"ranking {uni.get('ranking', '')}",
-                f"students {uni.get('students', '')}",
-                f"founded {uni.get('founded', '')}"
-            ]
+            # Create searchable text for each university
+            documents = []
+            for uni in self.universities:
+                text_parts = [
+                    uni['name'],
+                    uni.get('city', ''),
+                    uni['country'],
+                    uni['type'],
+                    f"ranking {uni.get('ranking', '')}",
+                    f"students {uni.get('students', '')}",
+                    f"founded {uni.get('founded', '')}"
+                ]
 
-            # Add notable programs if available
-            if 'notable_programs' in uni:
-                text_parts.extend(uni['notable_programs'])
+                # Add notable programs if available
+                if 'notable_programs' in uni:
+                    text_parts.extend(uni['notable_programs'])
 
-            documents.append(' '.join(str(p) for p in text_parts))
+                documents.append(' '.join(str(p) for p in text_parts))
 
-        self.vectorizer = TfidfVectorizer(
-            stop_words='english',
-            max_features=1000,
-            ngram_range=(1, 2),
-            min_df=1
-        )
-        self.doc_vectors = self.vectorizer.fit_transform(documents)
-        self._retrieval_initialized = True
+            self.vectorizer = TfidfVectorizer(
+                stop_words='english',
+                max_features=1000,
+                ngram_range=(1, 2),
+                min_df=1
+            )
+            self.doc_vectors = self.vectorizer.fit_transform(documents)
+            self._retrieval_initialized = True
+        except ImportError as e:
+            print(f"Warning: sklearn not available - {e}. Using fallback mode.")
+            self._retrieval_initialized = False
 
     def retrieve_relevant_universities(
         self,
@@ -125,6 +129,10 @@ class UniversityChatbot:
         # Ensure retrieval system is initialized (truly lazy loading)
         if not self._retrieval_initialized:
             self._initialize_retrieval()
+
+        # If sklearn not available, use simple keyword matching
+        if not self._retrieval_initialized:
+            return self._simple_keyword_search(query, top_k)
 
         # Lazy imports to avoid startup errors
         import numpy as np
@@ -155,6 +163,30 @@ class UniversityChatbot:
                 uni['relevance_score'] = 0.9
 
         return results
+
+    def _simple_keyword_search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """Simple keyword-based search when sklearn is not available."""
+        query_lower = query.lower()
+        keywords = query_lower.split()
+
+        # Score each university by keyword matches
+        scored_unis = []
+        for uni in self.universities:
+            score = 0
+            uni_text = f"{uni['name']} {uni.get('city', '')} {uni['country']} {uni['type']}".lower()
+
+            for keyword in keywords:
+                if keyword in uni_text:
+                    score += 1
+
+            if score > 0:
+                uni_copy = uni.copy()
+                uni_copy['relevance_score'] = float(score) / len(keywords)
+                scored_unis.append(uni_copy)
+
+        # Sort by score and return top-k
+        scored_unis.sort(key=lambda x: x['relevance_score'], reverse=True)
+        return scored_unis[:top_k] if scored_unis else self.universities[:top_k]
 
     def format_university_context(self, universities: List[Dict[str, Any]]) -> str:
         """Format university data as context for the LLM."""

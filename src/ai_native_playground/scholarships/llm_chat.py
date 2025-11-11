@@ -81,22 +81,26 @@ class ScholarshipChatbot:
 
     def _initialize_retrieval(self):
         """Initialize TF-IDF vectorizer for document retrieval (lazy loading)."""
-        # Lazy import to avoid startup errors
-        from sklearn.feature_extraction.text import TfidfVectorizer
+        try:
+            # Lazy import to avoid startup errors
+            from sklearn.feature_extraction.text import TfidfVectorizer
 
-        # Initialize TF-IDF vectorizer
-        self.vectorizer = TfidfVectorizer(
-            max_features=1000,
-            ngram_range=(1, 2),
-            stop_words='english'
-        )
+            # Initialize TF-IDF vectorizer
+            self.vectorizer = TfidfVectorizer(
+                max_features=1000,
+                ngram_range=(1, 2),
+                stop_words='english'
+            )
 
-        # Create searchable text for each scholarship
-        self.scholarship_texts = self._create_searchable_texts()
+            # Create searchable text for each scholarship
+            self.scholarship_texts = self._create_searchable_texts()
 
-        # Fit vectorizer
-        self.tfidf_matrix = self.vectorizer.fit_transform(self.scholarship_texts)
-        self._retrieval_initialized = True
+            # Fit vectorizer
+            self.tfidf_matrix = self.vectorizer.fit_transform(self.scholarship_texts)
+            self._retrieval_initialized = True
+        except ImportError as e:
+            print(f"Warning: sklearn not available - {e}. Using fallback mode.")
+            self._retrieval_initialized = False
 
     def retrieve_relevant_scholarships(
         self,
@@ -118,6 +122,10 @@ class ScholarshipChatbot:
         # Ensure retrieval system is initialized (truly lazy loading)
         if not self._retrieval_initialized:
             self._initialize_retrieval()
+
+        # If sklearn not available, use simple keyword matching
+        if not self._retrieval_initialized:
+            return self._simple_keyword_search(query, top_k)
 
         # Lazy imports to avoid startup errors
         import numpy as np
@@ -155,6 +163,41 @@ class ScholarshipChatbot:
                 results = sorted_scholarships[:top_k]
 
         return results[:top_k]
+
+    def _simple_keyword_search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+        """Simple keyword-based search when sklearn is not available."""
+        query_lower = query.lower()
+        keywords = query_lower.split()
+
+        # Score each scholarship by keyword matches
+        scored_scholarships = []
+        for scholarship in self.scholarships:
+            score = 0
+            scholarship_text = f"{scholarship.get('name', '')} {scholarship.get('provider', '')} {scholarship.get('country', '')} {scholarship.get('type', '')} {scholarship.get('field', '')} {scholarship.get('level', '')}".lower()
+
+            for keyword in keywords:
+                if keyword in scholarship_text:
+                    score += 1
+
+            # Check for special keywords
+            if 'renewable' in query_lower and scholarship.get('renewable'):
+                score += 2
+            if 'international' in query_lower and scholarship.get('level') == 'International':
+                score += 2
+
+            # Check amount if specified in query
+            if any(amount_word in query_lower for amount_word in ['over', 'above', 'high', 'large']):
+                if scholarship.get('amount', 0) > 30000:
+                    score += 1
+
+            if score > 0:
+                scholarship_copy = scholarship.copy()
+                scholarship_copy['similarity_score'] = float(score) / len(keywords)
+                scored_scholarships.append(scholarship_copy)
+
+        # Sort by score and return top-k
+        scored_scholarships.sort(key=lambda x: x['similarity_score'], reverse=True)
+        return scored_scholarships[:top_k] if scored_scholarships else self.scholarships[:top_k]
 
     def _expand_query(self, query: str) -> str:
         """Expand query with synonyms and related terms."""
