@@ -144,6 +144,24 @@ ai-native-playground/
 └── README.md                     # This file
 ```
 
+## 🚀 Quick Deploy to Cloud
+
+### Deploy to Render (Recommended for Production)
+
+Deploy all services to the cloud in minutes!
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+**What you get**:
+- ✅ 4 production-ready APIs (Weather, Reddit Sentiment, University, Scholarship)
+- ✅ Free tier available (750 hours/month per service)
+- ✅ Auto-scaling and SSL certificates
+- ✅ One-click deployment from GitHub
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide.
+
+---
+
 ## 🛠️ Installation
 
 ### Option 1: Development Installation (Recommended)

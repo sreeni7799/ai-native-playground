@@ -1,0 +1,61 @@
+# Render deployment configuration
+# This file defines all services to deploy on Render
+
+services:
+  # Weather API Service
+  - type: web
+    name: ai-playground-weather-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: uvicorn ai_native_playground.weather_api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENWEATHER_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # Reddit Sentiment Analyzer Service
+  - type: web
+    name: ai-playground-reddit-sentiment
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: uvicorn ai_native_playground.reddit_sentiment.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # University Chatbot API (optional)
+  - type: web
+    name: ai-playground-university-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: |
+      pip install -e .
+      python -m ai_native_playground.universities.generate_4000_data
+    startCommand: uvicorn ai_native_playground.universities.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # Scholarship Chatbot API (optional)
+  - type: web
+    name: ai-playground-scholarship-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: |
+      pip install -e .
+      python -m ai_native_playground.scholarships.generate_scholarships
+    startCommand: uvicorn ai_native_playground.scholarships.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
