@@ -10,6 +10,8 @@ services:
     region: oregon
     plan: free
     buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
       pip install -e .
       python -m ai_native_playground.universities.generate_4000_data
       python -m ai_native_playground.scholarships.generate_scholarships
