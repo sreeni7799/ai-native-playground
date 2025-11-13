@@ -237,13 +237,21 @@ class UniversityChatbot:
 
         return '\n'.join(context_parts)
 
-    def generate_response(self, query: str, context: str) -> str:
+    def generate_response(
+        self,
+        query: str,
+        context: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        user_profile: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
         Generate response using LLM with retrieved context.
 
         Args:
             query: User query
             context: Retrieved university data
+            conversation_history: Previous conversation messages
+            user_profile: User's academic profile for personalization
 
         Returns:
             Generated response
@@ -251,30 +259,85 @@ class UniversityChatbot:
         if not self.llm_available:
             return self._generate_fallback_response(context)
 
-        system_prompt = """You are a knowledgeable university advisor assistant.
-You help students find and learn about universities around the world.
-Use the provided university data to answer questions accurately and helpfully.
-Be concise but informative. If asked to compare universities, provide balanced insights.
-If the data doesn't contain information to answer the question, say so politely."""
+        # Build system prompt with personality
+        system_prompt = """You are an intelligent, friendly university advisor assistant - like a knowledgeable friend helping students navigate their education journey.
 
-        user_prompt = f"""Based on the following university information, please answer this question:
+Your personality:
+- Conversational and warm, not robotic
+- Vary your responses - don't give identical answers to similar questions
+- Remember context from the conversation
+- Provide personalized recommendations based on the user's profile
+- Be encouraging and supportive
+- Use natural language, occasional emojis, and varied sentence structures
 
-Question: {query}
+When answering:
+- Vary your opening phrases (don't always start the same way)
+- Provide specific details from the university data
+- If user shares their profile (GPA, test scores, field of study), use it to give tailored advice
+- Compare and contrast when relevant
+- Highlight key differentiators between universities
+- Be honest about competitiveness and requirements"""
 
-University Data:
+        # Build user prompt with conversation history and profile
+        user_prompt_parts = []
+
+        # Add user profile if available
+        if user_profile:
+            profile_info = []
+            if user_profile.get('degree'):
+                profile_info.append(f"Degree Level: {user_profile['degree']}")
+            if user_profile.get('field'):
+                profile_info.append(f"Field of Study: {user_profile['field']}")
+            if user_profile.get('gpa'):
+                profile_info.append(f"GPA: {user_profile['gpa']}")
+            if user_profile.get('test_scores'):
+                scores = ', '.join([f"{k}: {v}" for k, v in user_profile['test_scores'].items()])
+                profile_info.append(f"Test Scores: {scores}")
+            if user_profile.get('budget'):
+                profile_info.append(f"Budget: ${user_profile['budget']:,}")
+            if user_profile.get('countries'):
+                profile_info.append(f"Preferred Countries: {', '.join(user_profile['countries'])}")
+
+            if profile_info:
+                user_prompt_parts.append(f"Student Profile:\n" + '\n'.join(f"- {info}" for info in profile_info))
+
+        # Add conversation history for context
+        if conversation_history and len(conversation_history) > 0:
+            history_text = "Previous conversation:\n"
+            for msg in conversation_history[-6:]:  # Last 3 exchanges
+                role = "Student" if msg['role'] == 'user' else "You"
+                history_text += f"{role}: {msg['content']}\n"
+            user_prompt_parts.append(history_text)
+
+        # Add current query and university data
+        user_prompt_parts.append(f"""Current question: {query}
+
+Relevant University Data:
 {context}
 
-Please provide a helpful, accurate response based on the data above."""
+Please provide a natural, conversational, and personalized response. If you mentioned something about these universities in the previous conversation, build on that rather than repeating. If the student shared their profile, use it to give tailored recommendations.""")
+
+        user_prompt = '\n\n'.join(user_prompt_parts)
 
         try:
+            # Build messages list for OpenAI
+            messages = [{"role": "system", "content": system_prompt}]
+
+            # Add conversation history
+            if conversation_history:
+                for msg in conversation_history[-6:]:
+                    messages.append({"role": msg['role'], "content": msg['content']})
+
+            # Add current query
+            messages.append({"role": "user", "content": user_prompt})
+
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                max_tokens=500
+                messages=messages,
+                temperature=0.8,  # Higher for more varied responses
+                max_tokens=600,
+                presence_penalty=0.6,  # Reduce repetition
+                frequency_penalty=0.3
             )
             return response.choices[0].message.content
 
@@ -290,12 +353,19 @@ Please provide a helpful, accurate response based on the data above."""
 
 Note: For more detailed analysis and natural language responses, please set your OPENAI_API_KEY environment variable."""
 
-    def chat(self, query: str) -> Dict[str, Any]:
+    def chat(
+        self,
+        query: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        user_profile: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Main chat interface.
+        Main chat interface with conversation memory and personalization.
 
         Args:
             query: User query about universities
+            conversation_history: Previous conversation messages
+            user_profile: User's academic profile for personalization
 
         Returns:
             Dictionary with response and metadata
@@ -306,8 +376,13 @@ Note: For more detailed analysis and natural language responses, please set your
         # Format context
         context = self.format_university_context(universities)
 
-        # Generate response
-        response = self.generate_response(query, context)
+        # Generate response with history and profile
+        response = self.generate_response(
+            query,
+            context,
+            conversation_history=conversation_history,
+            user_profile=user_profile
+        )
 
         return {
             'query': query,

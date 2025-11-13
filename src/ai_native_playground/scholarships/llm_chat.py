@@ -265,12 +265,19 @@ class ScholarshipChatbot:
 
         return query
 
-    def chat(self, query: str) -> Dict[str, Any]:
+    def chat(
+        self,
+        query: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        user_profile: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Process a user query and return a response.
+        Process a user query and return a response with conversation memory.
 
         Args:
             query: User query
+            conversation_history: Previous conversation messages
+            user_profile: User's academic profile for personalization
 
         Returns:
             Dictionary with response and metadata
@@ -279,8 +286,13 @@ class ScholarshipChatbot:
         relevant_scholarships = self.retrieve_relevant_scholarships(query, top_k=5)
 
         if self.llm_available and relevant_scholarships:
-            # Use LLM for response
-            response = self._generate_llm_response(query, relevant_scholarships)
+            # Use LLM for response with history and profile
+            response = self._generate_llm_response(
+                query,
+                relevant_scholarships,
+                conversation_history=conversation_history,
+                user_profile=user_profile
+            )
             using_llm = True
         else:
             # Fallback response
@@ -296,36 +308,90 @@ class ScholarshipChatbot:
     def _generate_llm_response(
         self,
         query: str,
-        scholarships: List[Dict[str, Any]]
+        scholarships: List[Dict[str, Any]],
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        user_profile: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Generate response using OpenAI GPT."""
+        """Generate response using OpenAI GPT with conversation memory."""
         # Format scholarship data for context
         context = self._format_scholarships_for_context(scholarships)
 
-        # Create prompt
-        system_prompt = """You are a helpful scholarship advisor assistant.
-You have access to a database of 4,000+ scholarships worldwide.
-Provide accurate, helpful information about scholarships based on the data provided.
-Format amounts in currency (e.g., $50,000).
-Be concise but informative."""
+        # Create enhanced system prompt
+        system_prompt = """You are a warm, knowledgeable scholarship advisor - like a supportive mentor helping students find financial aid.
 
-        user_prompt = f"""Based on this scholarship data:
+Your personality:
+- Conversational and encouraging, not just informational
+- Vary your responses - make each answer unique and contextual
+- Remember details from the conversation
+- Provide personalized recommendations based on student's profile
+- Be realistic but hopeful about opportunities
+- Use natural language and varied expressions
 
+When answering:
+- Never give identical responses to similar questions - always provide fresh insights
+- If the student shared their profile (GPA, field, budget), use it for tailored suggestions
+- Highlight scholarships that match their specific needs
+- Explain why certain scholarships are good fits
+- Mention application tips or deadlines when relevant
+- Compare options when it helps the student decide"""
+
+        # Build user prompt with profile and history
+        user_prompt_parts = []
+
+        # Add user profile if available
+        if user_profile:
+            profile_info = []
+            if user_profile.get('degree'):
+                profile_info.append(f"Degree Level: {user_profile['degree']}")
+            if user_profile.get('field'):
+                profile_info.append(f"Field of Study: {user_profile['field']}")
+            if user_profile.get('gpa'):
+                profile_info.append(f"GPA: {user_profile['gpa']}")
+            if user_profile.get('budget'):
+                profile_info.append(f"Budget Needed: ${user_profile['budget']:,}")
+            if user_profile.get('countries'):
+                profile_info.append(f"Interested Countries: {', '.join(user_profile['countries'])}")
+
+            if profile_info:
+                user_prompt_parts.append(f"Student Profile:\n" + '\n'.join(f"- {info}" for info in profile_info))
+
+        # Add conversation history for context
+        if conversation_history and len(conversation_history) > 0:
+            history_text = "Previous conversation:\n"
+            for msg in conversation_history[-6:]:  # Last 3 exchanges
+                role = "Student" if msg['role'] == 'user' else "You"
+                history_text += f"{role}: {msg['content']}\n"
+            user_prompt_parts.append(history_text)
+
+        # Add current query and scholarship data
+        user_prompt_parts.append(f"""Current question: {query}
+
+Relevant Scholarship Data:
 {context}
 
-User question: {query}
+Provide a natural, conversational response. If you discussed scholarships before, build on that conversation. If the student shared their profile, use it to recommend the best matches and explain why.""")
 
-Please provide a helpful response about these scholarships. Include specific details like amounts, providers, and eligibility when relevant."""
+        user_prompt = '\n\n'.join(user_prompt_parts)
 
         try:
+            # Build messages list
+            messages = [{"role": "system", "content": system_prompt}]
+
+            # Add conversation history
+            if conversation_history:
+                for msg in conversation_history[-6:]:
+                    messages.append({"role": msg['role'], "content": msg['content']})
+
+            # Add current query
+            messages.append({"role": "user", "content": user_prompt})
+
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                max_tokens=500
+                messages=messages,
+                temperature=0.8,  # Higher for variety
+                max_tokens=600,
+                presence_penalty=0.6,  # Reduce repetition
+                frequency_penalty=0.3
             )
 
             return response.choices[0].message.content.strip()

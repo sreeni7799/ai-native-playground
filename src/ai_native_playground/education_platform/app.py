@@ -149,8 +149,26 @@ class CombinedSearchRequest(BaseModel):
     n_scholarships: int = 10
 
 
+class Message(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+
+
+class UserProfile(BaseModel):
+    """User profile for personalized recommendations."""
+    degree: Optional[str] = None  # e.g., "Bachelor's", "Master's", "PhD"
+    field: Optional[str] = None  # e.g., "Computer Science", "Engineering"
+    gpa: Optional[float] = None  # e.g., 3.5
+    test_scores: Optional[Dict[str, Any]] = None  # e.g., {"SAT": 1400, "GRE": 320}
+    budget: Optional[int] = None  # e.g., 50000
+    countries: Optional[List[str]] = None  # e.g., ["United States", "Canada"]
+    preferences: Optional[Dict[str, Any]] = None  # Any other preferences
+
+
 class ChatRequest(BaseModel):
     query: str
+    conversation_history: Optional[List[Message]] = []  # Previous messages
+    user_profile: Optional[UserProfile] = None  # User's academic profile
     context: Optional[str] = "general"  # "general", "universities", "scholarships"
 
 
@@ -655,11 +673,32 @@ async def chat(request: ChatRequest):
     try:
         query_lower = request.query.lower()
 
+        # Convert conversation history to dict format if provided
+        conversation_history = None
+        if request.conversation_history:
+            conversation_history = [
+                {"role": msg.role, "content": msg.content}
+                for msg in request.conversation_history
+            ]
+
+        # Convert user profile to dict if provided
+        user_profile = None
+        if request.user_profile:
+            user_profile = {
+                "degree": request.user_profile.degree,
+                "field": request.user_profile.field,
+                "gpa": request.user_profile.gpa,
+                "test_scores": request.user_profile.test_scores,
+                "budget": request.user_profile.budget,
+                "countries": request.user_profile.countries,
+                "preferences": request.user_profile.preferences
+            }
+
         # Determine context if not specified
         if request.context == "general":
-            if any(word in query_lower for word in ['scholarship', 'funding', 'financial aid', 'grant']):
+            if any(word in query_lower for word in ['scholarship', 'funding', 'financial aid', 'grant', 'money']):
                 context = "scholarships"
-            elif any(word in query_lower for word in ['university', 'college', 'school', 'program']):
+            elif any(word in query_lower for word in ['university', 'college', 'school', 'program', 'degree']):
                 context = "universities"
             else:
                 # Default to combined response
@@ -673,14 +712,22 @@ async def chat(request: ChatRequest):
         if context in ["universities", "both"]:
             try:
                 uni_chatbot = get_university_chatbot()
-                uni_result = uni_chatbot.chat(request.query)
+                uni_result = uni_chatbot.chat(
+                    request.query,
+                    conversation_history=conversation_history,
+                    user_profile=user_profile
+                )
                 responses.append({
                     "type": "universities",
                     "response": uni_result['response'],
-                    "items_found": uni_result.get('scholarships_found', 0),
+                    "items_found": uni_result.get('universities_found', 0),
                     "using_llm": uni_result.get('using_llm', False)
                 })
             except Exception as uni_error:
+                import traceback
+                error_details = traceback.format_exc()
+                print(f"University chatbot error: {error_details}")
+
                 # Fallback response if university chatbot fails
                 responses.append({
                     "type": "universities",
@@ -693,7 +740,11 @@ async def chat(request: ChatRequest):
         if context in ["scholarships", "both"]:
             try:
                 scholarship_chatbot = get_scholarship_chatbot()
-                scholarship_result = scholarship_chatbot.chat(request.query)
+                scholarship_result = scholarship_chatbot.chat(
+                    request.query,
+                    conversation_history=conversation_history,
+                    user_profile=user_profile
+                )
                 responses.append({
                     "type": "scholarships",
                     "response": scholarship_result['response'],
@@ -701,6 +752,10 @@ async def chat(request: ChatRequest):
                     "using_llm": scholarship_result.get('using_llm', False)
                 })
             except Exception as schol_error:
+                import traceback
+                error_details = traceback.format_exc()
+                print(f"Scholarship chatbot error: {error_details}")
+
                 # Fallback response if scholarship chatbot fails
                 responses.append({
                     "type": "scholarships",
